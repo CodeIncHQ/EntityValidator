@@ -1,6 +1,6 @@
 {
   "name": "codeinc/entity-validator",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A values validator for entities",
   "homepage": "https://github.com/CodeIncHQ/EntityValidator",
   "type": "library",
