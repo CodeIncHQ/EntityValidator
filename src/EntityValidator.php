@@ -93,9 +93,13 @@ class EntityValidator implements ValidatorInterface
      */
     public function hasError():bool
     {
-        return !empty($this->errors);
+        foreach ($this->fieldsValidators as $fieldValidator) {
+            if ($fieldValidator->hasError()) {
+                return true;
+            }
+        }
+        return false;
     }
-
 
     /**
      * @inheritdoc
