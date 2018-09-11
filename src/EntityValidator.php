@@ -240,6 +240,38 @@ class EntityValidator implements EntityValidatorInterface
 
     /**
      * @param mixed $value
+     * @param mixed $equal
+     * @param string $fieldName
+     * @param string $errorMessage
+     * @return bool
+     */
+    public function assertEqual($value, $equal, string $fieldName, string $errorMessage):bool
+    {
+        if ($value == $equal) {
+            $this->reportError($fieldName, $errorMessage);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param mixed $value
+     * @param mixed $strictEqual
+     * @param string $fieldName
+     * @param string $errorMessage
+     * @return bool
+     */
+    public function assertStrictEqual($value, $strictEqual, string $fieldName, string $errorMessage):bool
+    {
+        if ($value === $strictEqual) {
+            $this->reportError($fieldName, $errorMessage);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param mixed $value
      * @param int $maxLength
      * @param string $fieldName
      * @param string $errorMessage
