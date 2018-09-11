@@ -27,7 +27,7 @@ namespace CodeInc\EntityValidator;
  * @package CodeInc\EntityValidator
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-abstract class EntityValidator implements EntityValidatorInterface
+class EntityValidator implements EntityValidatorInterface
 {
     /**
      * @var string[][]
