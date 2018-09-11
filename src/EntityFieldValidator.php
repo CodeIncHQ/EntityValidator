@@ -15,59 +15,50 @@
 // +---------------------------------------------------------------------+
 //
 // Author:   Joan Fabrégat <joan@codeinc.fr>
-// Date:     10/09/2018
+// Date:     11/09/2018
 // Project:  EntityValidator
 //
 declare(strict_types=1);
 namespace CodeInc\EntityValidator;
 
 /**
- * Interface EntityValidatorInterface
+ * Class EntityFieldValidator
  *
  * @package CodeInc\EntityValidator
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-interface EntityValidatorInterface extends \Countable
+class EntityFieldValidator extends ValueValidator
 {
     /**
-     * Returns all the errors in an assoc array sorted by fields.
-     *
-     * @return string[][]
+     * @var string
      */
-    public function getErrors():array;
+    private $fieldName;
 
     /**
-     * Returns the errors for a given field.
+     * EntityFieldValidator constructor.
      *
      * @param string $fieldName
-     * @return array|null
      */
-    public function getFieldErrors(string $fieldName):?array;
+    public function __construct(string $fieldName)
+    {
+        $this->fieldName = $fieldName;
+    }
 
     /**
-     * Returns the names of the fields with a least one reported error.
-     *
-     * @return array
+     * @return string
      */
-    public function getFieldsWithError():array;
+    public function getFieldName():string
+    {
+        return $this->fieldName;
+    }
 
     /**
-     * Verifies if a least one error is reported.
-     *
-     * @return bool
+     * @param string $assertingWhat
+     * @return string
      */
-    public function hasError():bool;
-
-    /**
-     * Count the reported errors.
-     *
-     * @return int
-     */
-    public function countErrors():int;
-
-    /**
-     * @inheritdoc
-     * @return int
-     */
-    public function count():int;
+    protected function getAssertErrMsg(string $assertingWhat):string
+    {
+        return sprintf("Failed asserting that the field '%s' value %s",
+            $this->fieldName, $assertingWhat);
+    }
 }

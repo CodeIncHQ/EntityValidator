@@ -27,435 +27,64 @@ namespace CodeInc\EntityValidator;
  * @package CodeInc\EntityValidator
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class EntityValidator implements EntityValidatorInterface
+class EntityValidator implements ValidatorInterface
 {
     /**
-     * @var string[][]
+     * @var EntityFieldValidator[]
      */
-    private $errors = [];
+    private $fieldsValidators = [];
 
     /**
-     * Reports an error.
+     * Returns a field validator.
      *
-     * @param string $errorMessage
      * @param string $fieldName
+     * @return EntityFieldValidator
      */
-    public function reportError(string $fieldName, string $errorMessage):void
+    public function getFieldValidator(string $fieldName):EntityFieldValidator
     {
-        $this->errors[$fieldName][] = $errorMessage;
-    }
-
-    /**
-     * @uses filter_var()
-     * @param mixed $value
-     * @param int $filter
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @param mixed|null $filterOptions
-     * @return bool
-     */
-    public function assertFilter($value, int $filter, string $fieldName, string $errorMessage, $filterOptions = null):bool
-    {
-        if (!filter_var((string)$value, $filter, $filterOptions)) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
+        if (!isset($this->fieldsValidators[$fieldName])) {
+            $this->fieldsValidators[$fieldName] = new EntityFieldValidator($fieldName);
         }
-        return true;
+        return $this->fieldsValidators[$fieldName];
     }
 
     /**
-     * @param mixed $value
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
+     * Returns all the fields validators.
+     *
+     * @return EntityFieldValidator[]
      */
-    public function assertStringIsEmail($value, string $fieldName, string $errorMessage):bool
+    public function getFieldsValidators():array
     {
-        return $this->assertFilter($value, FILTER_VALIDATE_EMAIL, $fieldName, $errorMessage);
+        return $this->fieldsValidators;
     }
 
     /**
-     * @param mixed $value
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
+     * Returns all the fields validators with at least an error.
+     *
+     * @return array
      */
-    public function assertStringIsUrl($value, string $fieldName, string $errorMessage):bool
+    public function getFieldsValidatorsWithError():array
     {
-        return $this->assertFilter($value, FILTER_VALIDATE_URL, $fieldName, $errorMessage);
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertStringIsIpV4($value, string $fieldName, string $errorMessage):bool
-    {
-        return $this->assertFilter($value, FILTER_VALIDATE_IP, $fieldName, $errorMessage);
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertNotEmpty($value, string $fieldName, string $errorMessage):bool
-    {
-        if (empty($value)) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
+        $validators = [];
+        foreach ($this->fieldsValidators as $fieldValidator) {
+            if ($fieldValidator->hasError()) {
+                $validators[$fieldValidator->getFieldName()] = $fieldValidator;
+            }
         }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertNotNull($value, string $fieldName, string $errorMessage):bool
-    {
-        if ($value === null) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertIsArray($value, string $fieldName, string $errorMessage):bool
-    {
-        if (!is_array($value)) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @uses preg_match()
-     * @param mixed $value
-     * @param string $regExp
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertRegExp($value, string $regExp, string $fieldName, string $errorMessage):bool
-    {
-        if (!preg_match($regExp, $value)) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param int $minLength
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertMinLength($value, int $minLength, string $fieldName, string $errorMessage):bool
-    {
-        if (strlen($value) < $minLength) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param int $greaterThan
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertGreaterThan($value, int $greaterThan, string $fieldName, string $errorMessage):bool
-    {
-        if ($value <= $greaterThan) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param int $greaterThan
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertGreaterThanOrEqual($value, int $greaterThan, string $fieldName, string $errorMessage):bool
-    {
-        if ($value < $greaterThan) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param int $lowerThan
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertLessThan($value, int $lowerThan, string $fieldName, string $errorMessage):bool
-    {
-        if ($value >= $lowerThan) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param int $lowerThan
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertLessThanOrEqual($value, int $lowerThan, string $fieldName, string $errorMessage):bool
-    {
-        if ($value > $lowerThan) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param mixed $equal
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertEqual($value, $equal, string $fieldName, string $errorMessage):bool
-    {
-        if ($value == $equal) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param mixed $strictEqual
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertStrictEqual($value, $strictEqual, string $fieldName, string $errorMessage):bool
-    {
-        if ($value === $strictEqual) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param int $maxLength
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertMaxLength($value, int $maxLength, string $fieldName, string $errorMessage):bool
-    {
-        if (strlen($value) > $maxLength) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param \DateTime $dateTime
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertInPast(\DateTime $dateTime, string $fieldName, string $errorMessage):bool
-    {
-        if ($dateTime < new \DateTime()) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param \DateTime $dateTime
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertInFuture(\DateTime $dateTime, string $fieldName, string $errorMessage):bool
-    {
-        if ($dateTime > new \DateTime()) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param bool|mixed $condition
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assert($condition, string $fieldName, string $errorMessage):bool
-    {
-        if (!$condition) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param int $count
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertCount($value, int $count, string $fieldName, string $errorMessage):bool
-    {
-        if (count($value) != $count) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param array $array
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertInArray($value, array $array, string $fieldName, string $errorMessage):bool
-    {
-        if (!in_array($value, $array)) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $type
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertInternalType($value, string $type, string $fieldName, string $errorMessage):bool
-    {
-        if (gettype($value) != $type) {
-            $this->reportError($fieldName, $errorMessage);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $startsWith
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertStringStartsWith($value, string $startsWith, string $fieldName, string $errorMessage):bool
-    {
-        return $this->assertRegExp(
-            $value,
-            '/^'.preg_quote($startsWith, '/').'/ui',
-            $fieldName,
-            $errorMessage
-        );
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $endsWith
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertStringEndsWith($value, string $endsWith, string $fieldName, string $errorMessage):bool
-    {
-        return $this->assertRegExp(
-            $value,
-            '/'.preg_quote($endsWith, '$/').'/ui',
-            $fieldName,
-            $errorMessage
-        );
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $contains
-     * @param string $fieldName
-     * @param string $errorMessage
-     * @return bool
-     */
-    public function assertStringContains($value, string $contains, string $fieldName, string $errorMessage):bool
-    {
-        return $this->assertRegExp(
-            $value,
-            '/'.preg_quote($contains, '$/').'/ui',
-            $fieldName,
-            $errorMessage
-        );
+        return $validators;
     }
 
     /**
      * @inheritdoc
-     * @return string[][]
+     * @return string[]
      */
     public function getErrors():array
     {
-        return $this->errors;
-    }
-
-    /**
-     * @inheritdoc
-     * @param string $fieldName
-     * @return array|null
-     */
-    public function getFieldErrors(string $fieldName):?array
-    {
-        return $this->errors[$fieldName] ?? null;
-    }
-
-    /**
-     * @inheritdoc
-     * @return array
-     */
-    public function getFieldsWithError():array
-    {
-        return array_keys($this->errors);
+        $errors = [];
+        foreach ($this->fieldsValidators as $fieldValidator) {
+            array_merge($errors, $fieldValidator->getErrors());
+        }
+        return $errors;
     }
 
     /**
@@ -467,18 +96,6 @@ class EntityValidator implements EntityValidatorInterface
         return !empty($this->errors);
     }
 
-    /**
-     * @inheritdoc
-     * @return int
-     */
-    public function countErrors():int
-    {
-        $count = 0;
-        foreach ($this->errors as $fieldErrors) {
-            $count += count($fieldErrors);
-        }
-        return $count;
-    }
 
     /**
      * @inheritdoc
@@ -487,6 +104,10 @@ class EntityValidator implements EntityValidatorInterface
      */
     public function count():int
     {
-        return $this->countErrors();
+        $count = 0;
+        foreach ($this->fieldsValidators as $fieldsValidator) {
+            $count += $fieldsValidator->count();
+        }
+        return $count;
     }
 }
