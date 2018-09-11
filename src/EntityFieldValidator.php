@@ -27,7 +27,7 @@ namespace CodeInc\EntityValidator;
  * @package CodeInc\EntityValidator
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class EntityFieldValidator extends ValueValidator
+class EntityFieldValidator extends Validator
 {
     /**
      * @var string
