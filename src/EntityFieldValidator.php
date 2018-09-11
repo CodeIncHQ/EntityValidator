@@ -38,10 +38,12 @@ class EntityFieldValidator extends Validator
      * EntityFieldValidator constructor.
      *
      * @param string $fieldName
+     * @param mixed $value
      */
-    public function __construct(string $fieldName)
+    public function __construct(string $fieldName, $value)
     {
         $this->fieldName = $fieldName;
+        parent::__construct($value);
     }
 
     /**

@@ -35,6 +35,21 @@ class Validator implements ValidatorInterface
     private $errors = [];
 
     /**
+     * @var mixed
+     */
+    private $value;
+
+    /**
+     * Validator constructor.
+     *
+     * @param mixed $value
+     */
+    public function __construct($value)
+    {
+        $this->value = $value;
+    }
+
+    /**
      * @return array
      */
     public function getErrors():array
@@ -93,135 +108,123 @@ class Validator implements ValidatorInterface
 
     /**
      * @uses filter_var()
-     * @param mixed $value
      * @param int $filter
      * @param string $errorMessage
      * @param null $filterOptions
      * @return static
      */
-    public function assertFilter($value, int $filter, string $errorMessage, $filterOptions = null):self
+    public function assertFilter(int $filter, string $errorMessage, $filterOptions = null):self
     {
         $this->assert(
-            filter_var((string)$value, $filter, $filterOptions),
+            filter_var((string)$this->value, $filter, $filterOptions),
             $errorMessage
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertStringIsEmail($value, ?string $errorMessage = null):self
+    public function assertStringIsEmail(?string $errorMessage = null):self
     {
         $this->assertFilter(
-            $value,
             FILTER_VALIDATE_EMAIL,
-            $errorMessage ?? $this->getAssertErrMsg(sprintf("'%s' is an email", $value))
+            $errorMessage ?? $this->getAssertErrMsg(sprintf("'%s' is an email", $this->value))
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertStringIsUrl($value, ?string $errorMessage = null):self
+    public function assertStringIsUrl(?string $errorMessage = null):self
     {
         $this->assertFilter(
-            $value,
             FILTER_VALIDATE_URL,
-            $errorMessage ?? $this->getAssertErrMsg(sprintf("'%s' is a URL", $value))
+            $errorMessage ?? $this->getAssertErrMsg(sprintf("'%s' is a URL", $this->value))
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertStringIsIp($value, ?string $errorMessage = null):self
+    public function assertStringIsIp(?string $errorMessage = null):self
     {
         $this->assertFilter(
-            $value,
             FILTER_VALIDATE_IP,
-            $errorMessage ?? $this->getAssertErrMsg(sprintf("'%s' is an IP", $value))
+            $errorMessage ?? $this->getAssertErrMsg(sprintf("'%s' is an IP", $this->value))
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertNotEmpty($value, ?string $errorMessage = null):self
+    public function assertNotEmpty(?string $errorMessage = null):self
     {
         $this->assert(
-            !empty($value),
+            !empty($this->value),
             $errorMessage ?? $this->getAssertErrMsg("is not empty")
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertEmpty($value, ?string $errorMessage = null):self
+    public function assertEmpty(?string $errorMessage = null):self
     {
         $this->assert(
-            empty($value),
+            empty($this->value),
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("is empty (actual '%s')", $value)
+                sprintf("is empty (actual '%s')", $this->value)
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertNotNull($value, ?string $errorMessage = null):self
+    public function assertNotNull(?string $errorMessage = null):self
     {
         $this->assert(
-            $value !== null,
+            $this->value !== null,
             $errorMessage ?? $this->getAssertErrMsg("is not null")
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertNull($value, ?string $errorMessage = null):self
+    public function assertNull(?string $errorMessage = null):self
     {
         $this->assert(
-            $value === null,
+            $this->value === null,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("is null (actual '%s')", $value)
+                sprintf("is null (actual '%s')", $this->value)
             )
         );
         return $this;
     }
 
     /**
-     * @param $value
      * @param string $errorMessage
      * @return static
      */
-    public function assertIsArray($value, string $errorMessage):self
+    public function assertIsArray(string $errorMessage):self
     {
         $this->assert(
-            is_array($value),
+            is_array($this->value),
             $errorMessage ?? $this->getAssertErrMsg("is an array")
         );
         return $this;
@@ -229,169 +232,159 @@ class Validator implements ValidatorInterface
 
     /**
      * @uses preg_match()
-     * @param mixed|string $value
      * @param string $regExp
      * @param string|null $errorMessage
      * @return static
      */
-    public function assertRegExp($value, string $regExp, ?string $errorMessage = null):self
+    public function assertRegExp(string $regExp, ?string $errorMessage = null):self
     {
         $this->assert(
-            preg_match($regExp, (string)$value),
+            preg_match($regExp, (string)$this->value),
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' matches the PERL regular expression '%s'", $value, $regExp)
+                sprintf("'%s' matches the PERL regular expression '%s'", $this->value, $regExp)
             )
         );
         return $this;
     }
 
     /**
-     * @param string|mixed $value
      * @param int $minLength
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertMinLength($value, int $minLength, ?string $errorMessage = null):self
+    public function assertMinLength(int $minLength, ?string $errorMessage = null):self
     {
         $this->assert(
-            is_string($value) && strlen($value) < $minLength,
+            is_string($this->value) && strlen($this->value) < $minLength,
             $errorMessage ?? $this->getAssertErrMsg(
                 sprintf("'%s' has a minimum length of %s (actual length %s)",
-                    $value, $minLength, strlen($value))
+                    $this->value, $minLength, strlen($this->value))
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed|string $value
      * @param int $maxLength
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertMaxLength($value, int $maxLength, ?string $errorMessage = null):self
+    public function assertMaxLength(int $maxLength, ?string $errorMessage = null):self
     {
         $this->assert(
-            is_string($value) && strlen($value) > $maxLength,
+            is_string($this->value) && strlen($this->value) > $maxLength,
             $errorMessage ?? $this->getAssertErrMsg(
                 sprintf("'%s' as a max length of %s (actual length %s)",
-                    $value, $maxLength, strlen($value))
+                    $this->value, $maxLength, strlen($this->value))
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param int $greaterThan
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertGreaterThan($value, int $greaterThan, ?string $errorMessage = null):self
+    public function assertGreaterThan(int $greaterThan, ?string $errorMessage = null):self
     {
         $this->assert(
-            $value > $greaterThan,
+            $this->value > $greaterThan,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' is greater than %s", $value, $greaterThan)
+                sprintf("'%s' is greater than %s", $this->value, $greaterThan)
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param int $greaterThanOrEqual
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertGreaterThanOrEqual($value, int $greaterThanOrEqual, ?string $errorMessage = null):self
+    public function assertGreaterThanOrEqual(int $greaterThanOrEqual, ?string $errorMessage = null):self
     {
         $this->assert(
-            $value >= $greaterThanOrEqual,
+            $this->value >= $greaterThanOrEqual,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' is greater than or equal to %s", $value, $greaterThanOrEqual)
+                sprintf("'%s' is greater than or equal to %s", $this->value, $greaterThanOrEqual)
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param int $lowerThan
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertLessThan($value, int $lowerThan, ?string $errorMessage = null):self
+    public function assertLessThan(int $lowerThan, ?string $errorMessage = null):self
     {
         $this->assert(
-            $value < $lowerThan,
+            $this->value < $lowerThan,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' is lower than  %s", $value, $lowerThan)
+                sprintf("'%s' is lower than  %s", $this->value, $lowerThan)
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param int $lowerThanOrEqual
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertLessThanOrEqual($value, int $lowerThanOrEqual, ?string $errorMessage = null):self
+    public function assertLessThanOrEqual(int $lowerThanOrEqual, ?string $errorMessage = null):self
     {
         $this->assert(
-            $value <= $lowerThanOrEqual,
+            $this->value <= $lowerThanOrEqual,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' is greater than or equal to %s", $value, $lowerThanOrEqual)
+                sprintf("'%s' is greater than or equal to %s", $this->value, $lowerThanOrEqual)
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param mixed $equal
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertEqual($value, $equal, ?string $errorMessage = null):self
+    public function assertEqual($equal, ?string $errorMessage = null):self
     {
         $this->assert(
-            $value == $equal,
+            $this->value == $equal,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' is equal to '%s'", $value, $equal)
+                sprintf("'%s' is equal to '%s'", $this->value, $equal)
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param mixed $strictEqual
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertStrictEqual($value, $strictEqual, ?string $errorMessage = null):self
+    public function assertStrictEqual($strictEqual, ?string $errorMessage = null):self
     {
         $this->assert(
-            $value === $strictEqual,
+            $this->value === $strictEqual,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' is strictly equal to '%s'", $value, $strictEqual)
+                sprintf("'%s' is strictly equal to '%s'", $this->value, $strictEqual)
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed|\DateTime $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertIsDate($value, ?string $errorMessage = null):self
+    public function assertIsDate(?string $errorMessage = null):self
     {
         $this->assert(
-            $value instanceof \DateTime,
+            $this->value instanceof \DateTime,
             $errorMessage ?? $this->getAssertErrMsg(
                 sprintf("is a date (an instance of %s)",\DateTime::class)
             )
@@ -400,155 +393,144 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * @param \DateTime $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertDateIsInPast($value, ?string $errorMessage = null):self
+    public function assertDateIsInPast(?string $errorMessage = null):self
     {
         $this->assert(
-            $value instanceof \DateTime && $value < new \DateTime(),
+            $this->value instanceof \DateTime && $this->value < new \DateTime(),
             $errorMessage ?? $this->getAssertErrMsg(
                 sprintf("'%s' is in the past",
-                    $value instanceof \DateTime ? $value->format('Y-m-d H:i:s') : (string)$value)
+                    $this->value instanceof \DateTime ? $this->value->format('Y-m-d H:i:s') : (string)$this->value)
             )
         );
         return $this;
     }
 
     /**
-     * @param \DateTime $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertDateIsInFuture($value, ?string $errorMessage = null):self
+    public function assertDateIsInFuture(?string $errorMessage = null):self
     {
         $this->assert(
-            $value instanceof \DateTime && $value > new \DateTime(),
+            $this->value instanceof \DateTime && $this->value > new \DateTime(),
             $errorMessage ?? $this->getAssertErrMsg(
                 sprintf("'%s' is in the future",
-                    $value instanceof \DateTime ? $value->format('Y-m-d H:i:s') : (string)$value)
+                    $this->value instanceof \DateTime ? $this->value->format('Y-m-d H:i:s') : (string)$this->value)
             )
         );
         return $this;
     }
 
     /**
-     * @param \DateTime $value
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertDateIsToday($value, ?string $errorMessage = null):self
+    public function assertDateIsToday(?string $errorMessage = null):self
     {
         $this->assert(
-            $value instanceof \DateTime && $value->format('Y-m-d') > (new \DateTime())->format('Y-m-d'),
+            $this->value instanceof \DateTime && $this->value->format('Y-m-d') > (new \DateTime())->format('Y-m-d'),
             $errorMessage ?? $this->getAssertErrMsg(
                 sprintf("'%s' is today",
-                    $value instanceof \DateTime ? $value->format('Y-m-d') : (string)$value)
+                    $this->value instanceof \DateTime ? $this->value->format('Y-m-d') : (string)$this->value)
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param int $count
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertCount($value, int $count, ?string $errorMessage = null):self
+    public function assertCount(int $count, ?string $errorMessage = null):self
     {
         $this->assert(
-            count($value) == $count,
+            count($this->value) == $count,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("count is equal to %s (actual %s)", $count, count($value))
+                sprintf("count is equal to %s (actual %s)", $count, count($this->value))
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param array $array
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertInArray($value, array $array, ?string $errorMessage = null):self
+    public function assertInArray(array $array, ?string $errorMessage = null):self
     {
         $this->assert(
-            in_array($value, $array),
+            in_array($this->value, $array),
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' is in array (array values: %s)", $value, implode(', ', $array))
+                sprintf("'%s' is in array (array values: %s)", $this->value, implode(', ', $array))
             )
         );
         return $this;
     }
 
     /**
-     * @param mixed $value
      * @param string $type
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertInternalType($value, string $type, ?string $errorMessage = null):self
+    public function assertInternalType(string $type, ?string $errorMessage = null):self
     {
         $this->assert(
-            gettype($value) != $type,
+            gettype($this->value) != $type,
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("is of type '%s' (actual '%s')", $type, gettype($value))
+                sprintf("is of type '%s' (actual '%s')", $type, gettype($this->value))
             )
         );
         return $this;
     }
 
     /**
-     * @param string $value
      * @param string $startsWith
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertStringStartsWith($value, string $startsWith, ?string $errorMessage = null):self
+    public function assertStringStartsWith(string $startsWith, ?string $errorMessage = null):self
     {
         $this->assertRegExp(
-            $value,
             '/^'.preg_quote($startsWith, '/').'/ui',
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' starts with '%s'", $value, $startsWith)
+                sprintf("'%s' starts with '%s'", $this->value, $startsWith)
             )
         );
         return $this;
     }
 
     /**
-     * @param string $value
      * @param string $endsWith
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertStringEndsWith($value, string $endsWith, ?string $errorMessage = null):self
+    public function assertStringEndsWith(string $endsWith, ?string $errorMessage = null):self
     {
         $this->assertRegExp(
-            $value,
             '/'.preg_quote($endsWith, '/$').'/ui',
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' ends with '%s'", $value, $endsWith)
+                sprintf("'%s' ends with '%s'", $this->value, $endsWith)
             )
         );
         return $this;
     }
 
     /**
-     * @param string $value
      * @param string $contains
      * @param null|string $errorMessage
      * @return static
      */
-    public function assertStringContains($value, string $contains, ?string $errorMessage = null):self
+    public function assertStringContains(string $contains, ?string $errorMessage = null):self
     {
         $this->assertRegExp(
             '/'.preg_quote($contains, '$/').'/ui',
             $errorMessage ?? $this->getAssertErrMsg(
-                sprintf("'%s' contains '%s'", $value, $contains)
+                sprintf("'%s' contains '%s'", $this->value, $contains)
             )
         );
         return $this;
