@@ -1,6 +1,6 @@
 # EntityValidator
 
-This package provides a validator for entities values.
+This package provides a values validator for entities.
 
 ## Installation
 
