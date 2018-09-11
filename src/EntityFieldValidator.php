@@ -27,7 +27,7 @@ namespace CodeInc\EntityValidator;
  * @package CodeInc\EntityValidator
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class EntityFieldValidator extends Validator
+class EntityFieldValidator implements ValidatorInterface
 {
     /**
      * @var string
@@ -35,15 +35,30 @@ class EntityFieldValidator extends Validator
     private $fieldName;
 
     /**
+     * @var ValueValidator[]
+     */
+    private $valuesValidators = [];
+
+    /**
      * EntityFieldValidator constructor.
      *
      * @param string $fieldName
-     * @param mixed $value
      */
-    public function __construct(string $fieldName, $value)
+    public function __construct(string $fieldName)
     {
         $this->fieldName = $fieldName;
-        parent::__construct($value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return ValueValidator
+     */
+    public function value($value):ValueValidator
+    {
+        if (!isset($this->valuesValidators[$value])) {
+            $this->valuesValidators[$value] = new ValueValidator($value);
+        }
+        return $this->valuesValidators[$value];
     }
 
     /**
@@ -62,5 +77,47 @@ class EntityFieldValidator extends Validator
     {
         return sprintf("Failed asserting that the field '%s' value %s",
             $this->fieldName, $assertingWhat);
+    }
+
+    /**
+     * @inheritdoc
+     * @return string[]
+     */
+    public function getErrors():array
+    {
+        $errors = [];
+        foreach ($this->valuesValidators as $valueValidator) {
+            if ($valueValidator->hasError()) {
+                $errors = array_merge($errors, $valueValidator->getErrors());
+            }
+        }
+        return $errors;
+    }
+
+    /**
+     * @inheritdoc
+     * @return bool
+     */
+    public function hasError():bool
+    {
+        foreach ($this->valuesValidators as $valueValidator) {
+            if ($valueValidator->hasError()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     * @return int
+     */
+    public function count():int
+    {
+        $count = 0;
+        foreach ($this->valuesValidators as $valueValidator) {
+            $count += $valueValidator->count();
+        }
+        return $count;
     }
 }

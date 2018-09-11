@@ -40,7 +40,7 @@ class EntityValidator implements ValidatorInterface
      * @param string $fieldName
      * @return EntityFieldValidator
      */
-    public function getFieldValidator(string $fieldName):EntityFieldValidator
+    public function field(string $fieldName):EntityFieldValidator
     {
         if (!isset($this->fieldsValidators[$fieldName])) {
             $this->fieldsValidators[$fieldName] = new EntityFieldValidator($fieldName);
@@ -53,7 +53,7 @@ class EntityValidator implements ValidatorInterface
      *
      * @return EntityFieldValidator[]
      */
-    public function getFieldsValidators():array
+    public function getFields():array
     {
         return $this->fieldsValidators;
     }
@@ -63,7 +63,7 @@ class EntityValidator implements ValidatorInterface
      *
      * @return array
      */
-    public function getFieldsValidatorsWithError():array
+    public function getFieldsWithError():array
     {
         $validators = [];
         foreach ($this->fieldsValidators as $fieldValidator) {
@@ -82,7 +82,9 @@ class EntityValidator implements ValidatorInterface
     {
         $errors = [];
         foreach ($this->fieldsValidators as $fieldValidator) {
-            array_merge($errors, $fieldValidator->getErrors());
+            if ($fieldValidator->hasError()) {
+                $errors = array_merge($errors, $fieldValidator->getErrors());
+            }
         }
         return $errors;
     }

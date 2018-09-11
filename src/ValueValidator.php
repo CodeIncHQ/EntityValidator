@@ -22,12 +22,12 @@ declare(strict_types=1);
 namespace CodeInc\EntityValidator;
 
 /**
- * Class Validator
+ * Class ValueValidator
  *
  * @package CodeInc\EntityValidator
  * @author Joan Fabrégat <joan@codeinc.fr>
  */
-class Validator implements ValidatorInterface
+class ValueValidator implements ValidatorInterface
 {
     /**
      * @var array
@@ -40,7 +40,7 @@ class Validator implements ValidatorInterface
     private $value;
 
     /**
-     * Validator constructor.
+     * ValueValidator constructor.
      *
      * @param mixed $value
      */
