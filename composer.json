@@ -1,0 +1,33 @@
+{
+  "name": "codeinc/entity-validator",
+  "version": "1.0.0",
+  "description": "A values validator for entities",
+  "homepage": "https://github.com/CodeIncHQ/EntityValidator",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "CodeInc\\EntityValidator\\": "src"
+    }
+  },
+  "authors": [
+    {
+      "name": "Joan Fabrégat",
+      "email": "joan@codeinc.fr",
+      "homepage": "https://www.codeinc.fr",
+      "role": "developer"
+    }
+  ],
+  "config": {
+    "preferred-install": {
+      "*": "dist"
+    }
+  },
+  "suggest": {
+    "codeinc/entity-interface": "A simple interface for entities",
+    "codeinc/entities-collection": "An iterable entities collection"
+  }
+}
