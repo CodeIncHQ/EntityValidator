@@ -32,43 +32,68 @@ class EntityValidator implements ValidatorInterface
     /**
      * @var EntityFieldValidator[]
      */
-    private $fieldsValidators = [];
+    private $validators = [];
 
     /**
      * Returns a field validator.
      *
      * @param string $fieldName
+     * @param mixed $value
      * @return EntityFieldValidator
      */
-    public function field(string $fieldName):EntityFieldValidator
+    public function field(string $fieldName, $value):EntityFieldValidator
     {
-        if (!isset($this->fieldsValidators[$fieldName])) {
-            $this->fieldsValidators[$fieldName] = new EntityFieldValidator($fieldName);
-        }
-        return $this->fieldsValidators[$fieldName];
+        $validator = new EntityFieldValidator($fieldName, $value);
+        $this->validators[] = $validator;
+        return $validator;
     }
 
     /**
-     * Returns all the fields validators.
+     * Returns a value validator.
      *
-     * @return EntityFieldValidator[]
+     * @param string $value
+     * @return ValueValidator
      */
-    public function getFields():array
+    public function value(string $value):ValueValidator
     {
-        return $this->fieldsValidators;
+        $validator = new ValueValidator($value);
+        $this->validators[] = $validator;
+        return $validator;
+    }
+
+    /**
+     * Returns all the validators with at least an error.
+     *
+     * @param bool $onlyWithErrors
+     * @return ValidatorInterface[]
+     */
+    public function getValidators(bool $onlyWithErrors = false):array
+    {
+        if ($onlyWithErrors) {
+            $validators = [];
+            foreach ($this->validators as $validator) {
+                if ($validator->hasError()) {
+                    $validators[] = $validator;
+                }
+            }
+            return $validators;
+        }
+
+        return $this->validators;
     }
 
     /**
      * Returns all the fields validators with at least an error.
      *
+     * @param bool $onlyWithErrors
      * @return array
      */
-    public function getFieldsWithError():array
+    public function getFieldsValidators(bool $onlyWithErrors = false):array
     {
         $validators = [];
-        foreach ($this->fieldsValidators as $fieldValidator) {
-            if ($fieldValidator->hasError()) {
-                $validators[$fieldValidator->getFieldName()] = $fieldValidator;
+        foreach ($this->validators as $validator) {
+            if ($validator instanceof EntityFieldValidator && (!$onlyWithErrors || $validator->hasError())) {
+                $validators[] = $validator;
             }
         }
         return $validators;
@@ -81,9 +106,9 @@ class EntityValidator implements ValidatorInterface
     public function getErrors():array
     {
         $errors = [];
-        foreach ($this->fieldsValidators as $fieldValidator) {
-            if ($fieldValidator->hasError()) {
-                $errors = array_merge($errors, $fieldValidator->getErrors());
+        foreach ($this->validators as $validator) {
+            if ($validator->hasError()) {
+                $errors = array_merge($errors, $validator->getErrors());
             }
         }
         return $errors;
@@ -95,8 +120,8 @@ class EntityValidator implements ValidatorInterface
      */
     public function hasError():bool
     {
-        foreach ($this->fieldsValidators as $fieldValidator) {
-            if ($fieldValidator->hasError()) {
+        foreach ($this->validators as $validator) {
+            if ($validator->hasError()) {
                 return true;
             }
         }
@@ -111,8 +136,8 @@ class EntityValidator implements ValidatorInterface
     public function count():int
     {
         $count = 0;
-        foreach ($this->fieldsValidators as $fieldsValidator) {
-            $count += $fieldsValidator->count();
+        foreach ($this->validators as $validator) {
+            $count += $validator->count();
         }
         return $count;
     }
